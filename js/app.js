@@ -53,15 +53,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Configurar fechamento de modais
     document.querySelectorAll(".close-modal").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
         const modal = btn.closest(".modal");
-        modal.style.display = "none";
+        closeModal(modal.id);
       });
     });
 
     window.addEventListener("click", (event) => {
       if (event.target.classList.contains("modal")) {
-        event.target.style.display = "none";
+        closeModal(event.target.id);
       }
     });
 
@@ -135,6 +136,7 @@ async function atualizarMesasPeriodicamente() {
 
 // Configurar eventos
 function setupEventListeners() {
+  // Botão nova mesa
   document.getElementById("nova-mesa").addEventListener("click", async () => {
     const nome = prompt(
       "Digite o nome da nova mesa:",
@@ -154,11 +156,28 @@ function setupEventListeners() {
     }
   });
 
-  document.getElementById("btn-gerenciar-produtos").addEventListener("click", () => {
+  // Botões flutuantes - CORREÇÃO PRINCIPAL
+  document.getElementById("btn-item-custom").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal("modal-item-custom");
+  });
+
+  document.getElementById("btn-gerenciar-produtos").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     openModal("modal-gerenciar-produtos");
     renderGerenciadorProdutos();
   });
 
+  document.getElementById("btn-historico").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal("modal-historico");
+    renderHistorico();
+  });
+
+  // Botão salvar produto
   document.getElementById("btn-salvar-produto").addEventListener("click", async () => {
     const idRaw = document.getElementById("produto-id").value;
     const id = parseInt(idRaw, 10);
@@ -199,24 +218,24 @@ function setupEventListeners() {
     }
   });
 
-  document
-    .getElementById("excluir-mesa")
-    .addEventListener("click", excluirMesaAtual);
+  // Botão excluir mesa
+  document.getElementById("excluir-mesa").addEventListener("click", excluirMesaAtual);
 
+  // Busca de produtos
   document.getElementById("busca-produto").addEventListener("input", (e) => {
     renderProdutos(e.target.value.toLowerCase());
   });
 
+  // Filtros por categoria
   document.querySelectorAll(".categoria-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document
-        .querySelectorAll(".categoria-btn")
-        .forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".categoria-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       renderProdutos();
     });
   });
 
+  // Botões de desconto e divisão
   document.getElementById("aplicar-desconto").addEventListener("click", () => {
     openModal("modal-desconto");
   });
@@ -225,10 +244,12 @@ function setupEventListeners() {
     openModal("modal-dividir");
   });
 
+  // Botão salvar mesa
   document.getElementById("salvar-mesa").addEventListener("click", () => {
     salvarMesa();
   });
 
+  // Botão finalizar conta
   document.getElementById("finalizar-conta").addEventListener("click", () => {
     if (mesaAtual && mesaAtual.itens.length > 0) {
       openModal("modal-pagamento");
@@ -237,22 +258,11 @@ function setupEventListeners() {
     }
   });
 
-  document.getElementById("btn-historico").addEventListener("click", () => {
-    openModal("modal-historico");
-    renderHistorico();
-  });
+  // Modal de desconto
+  document.getElementById("aplicar-desconto-btn").addEventListener("click", aplicarDesconto);
+  document.getElementById("cancelar-desconto").addEventListener("click", cancelarDesconto);
 
-  document.getElementById("btn-item-custom").addEventListener("click", () => {
-    openModal("modal-item-custom");
-  });
-
-  document
-    .getElementById("aplicar-desconto-btn")
-    .addEventListener("click", aplicarDesconto);
-  document
-    .getElementById("cancelar-desconto")
-    .addEventListener("click", cancelarDesconto);
-
+  // Modal de divisão
   document.querySelectorAll(".divisao-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const pessoas = parseInt(btn.dataset.pessoas);
@@ -260,48 +270,42 @@ function setupEventListeners() {
     });
   });
 
-  document
-    .getElementById("divisao-personalizada")
-    .addEventListener("change", (e) => {
-      const pessoas = parseInt(e.target.value);
-      if (pessoas > 1) {
-        dividirConta(pessoas);
-      }
-    });
+  document.getElementById("divisao-personalizada").addEventListener("change", (e) => {
+    const pessoas = parseInt(e.target.value);
+    if (pessoas > 1) {
+      dividirConta(pessoas);
+    }
+  });
 
   document.getElementById("confirmar-divisao").addEventListener("click", () => {
     closeModal("modal-dividir");
   });
 
-  document
-    .querySelectorAll('input[name="forma-pagamento"]')
-    .forEach((radio) => {
-      radio.addEventListener("change", (e) => {
-        const trocoSection = document.getElementById("troco-section");
-        if (e.target.value === "dinheiro") {
-          trocoSection.classList.remove("hidden");
-          document.getElementById("valor-recebido").focus();
-        } else {
-          trocoSection.classList.add("hidden");
-        }
-      });
+  // Modal de pagamento
+  document.querySelectorAll('input[name="forma-pagamento"]').forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      const trocoSection = document.getElementById("troco-section");
+      if (e.target.value === "dinheiro") {
+        trocoSection.classList.remove("hidden");
+        document.getElementById("valor-recebido").focus();
+      } else {
+        trocoSection.classList.add("hidden");
+      }
     });
+  });
 
   document.getElementById("valor-recebido").addEventListener("input", (e) => {
     if (mesaAtual) {
       const valorRecebido = parseFloat(e.target.value) || 0;
       const total = calcularTotalMesa(mesaAtual).total;
       const troco = valorRecebido - total;
-      document.getElementById(
-        "troco-resultado"
-      ).textContent = `Troco: ${formatMoney(troco > 0 ? troco : 0)}`;
+      document.getElementById("troco-resultado").textContent = `Troco: ${formatMoney(troco > 0 ? troco : 0)}`;
     }
   });
 
-  document
-    .getElementById("confirmar-pagamento")
-    .addEventListener("click", finalizarConta);
+  document.getElementById("confirmar-pagamento").addEventListener("click", finalizarConta);
 
+  // Filtros do histórico
   document.getElementById("filtro-data").addEventListener("change", (e) => {
     renderHistorico(e.target.value);
   });
@@ -310,13 +314,11 @@ function setupEventListeners() {
     renderHistorico(null, e.target.value);
   });
 
-  document
-    .getElementById("adicionar-item-custom")
-    .addEventListener("click", adicionarItemCustomizado);
+  // Modal de item customizado
+  document.getElementById("adicionar-item-custom").addEventListener("click", adicionarItemCustomizado);
 
-  document
-    .getElementById("limpar-historico")
-    .addEventListener("click", limparHistoricoCompleto);
+  // Limpar histórico
+  document.getElementById("limpar-historico").addEventListener("click", limparHistoricoCompleto);
 }
 
 // Renderizar gerenciador de produtos
@@ -345,7 +347,7 @@ function renderGerenciadorProdutos() {
     produtos.forEach((produto) => {
       const div = document.createElement("div");
       div.className = "item-consumo";
-      div.style.display = "flex"; // Garante que o flex seja aplicado
+      div.style.display = "flex";
 
       div.innerHTML = `
         <div style="flex: 1;">
@@ -381,11 +383,7 @@ async function excluirMesaAtual() {
     return;
   }
 
-  if (
-    !confirm(
-      `Tem certeza que deseja excluir permanentemente a ${mesaAtual.nome}?`
-    )
-  ) {
+  if (!confirm(`Tem certeza que deseja excluir permanentemente a ${mesaAtual.nome}?`)) {
     return;
   }
 
@@ -444,11 +442,7 @@ function renderMesas() {
     if (btnExcluir) {
       btnExcluir.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (
-          confirm(
-            `Tem certeza que deseja excluir permanentemente a ${mesa.nome}?`
-          )
-        ) {
+        if (confirm(`Tem certeza que deseja excluir permanentemente a ${mesa.nome}?`)) {
           try {
             await deleteMesa(mesa.id);
             mesas = await getAllMesas();
@@ -598,7 +592,6 @@ function renderConsumoMesa() {
   totalValor.textContent = totalText;
   renderMesas();
 }
-
 
 // Adicionar item à mesa
 async function adicionarItemMesa(produto) {
@@ -1013,9 +1006,7 @@ async function renderHistorico(dateFilter = "", mesaFilter = "") {
     const btnExcluir = contaElement.querySelector(".btn-excluir-historico");
     btnExcluir.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (
-        confirm("Tem certeza que deseja excluir este registro do histórico?")
-      ) {
+      if (confirm("Tem certeza que deseja excluir este registro do histórico?")) {
         try {
           await deleteHistorico(conta.id);
           renderHistorico();
@@ -1030,6 +1021,7 @@ async function renderHistorico(dateFilter = "", mesaFilter = "") {
     contaElement.addEventListener("click", () => {
       mostrarDetalhesHistorico(conta);
     });
+
 
     historicoLista.appendChild(contaElement);
   });

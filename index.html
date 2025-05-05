@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bar Parada 666 - Sistema de Atendimento</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#8b0000" />
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(reg => console.log("Service Worker registrado!"))
+        .catch(err => console.log("Falha no Service Worker", err));
+    });
+  }
+</script>
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-skull"></i> Bar Parada 666</h1>
+      <p>Sistema Ágil de Atendimento</p>
+    </header>
+
+    <div class="main-content">
+      <div class="left-panel">
+        <div class="mesas-section">
+          <h2>Mesas</h2>
+          <div class="mesas-list" id="mesas-list"></div>
+          <div class="mesa-buttons">
+            <button id="nova-mesa" class="btn"><i class="fas fa-plus"></i> Nova Mesa</button>
+            <button id="excluir-mesa" class="btn btn-danger"><i class="fas fa-trash"></i> Excluir Mesa</button>
+          </div>
+        </div>
+
+        <div class="produtos-section">
+          <h2>Produtos</h2>
+          <input type="text" id="busca-produto" placeholder="Digite para buscar produtos..." />
+          <div class="categorias">
+            <button class="categoria-btn active" data-categoria="todos">Todos</button>
+            <button class="categoria-btn" data-categoria="bebidas">Bebidas</button>
+            <button class="categoria-btn" data-categoria="cervejas">Cervejas</button>
+            <button class="categoria-btn" data-categoria="drinks">Drinks</button>
+            <button class="categoria-btn" data-categoria="doces">Doces</button>
+            <button class="categoria-btn" data-categoria="petiscos">Petiscos</button>
+            <button class="categoria-btn" data-categoria="populares">Populares</button>
+          </div>
+          <div class="produtos-grid" id="produtos-grid"></div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="consumo-section">
+          <h2>Consumo Atual</h2>
+          <div class="mesa-info" id="mesa-info"></div>
+          <div class="itens-consumo" id="itens-consumo"></div>
+          <div class="total-section">
+            <div class="total-valor" id="total-valor">Total: R$ 0,00</div>
+            <div class="total-buttons">
+              <button id="aplicar-desconto" class="btn"><i class="fas fa-percentage"></i> Desconto</button>
+              <button id="dividir-conta" class="btn"><i class="fas fa-divide"></i> Dividir</button>
+              <button id="salvar-mesa" class="btn"><i class="fas fa-save"></i> Salvar</button>
+              <button id="finalizar-conta" class="btn btn-primary"><i class="fas fa-receipt"></i> Finalizar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Aplicar Desconto -->
+  <div id="modal-desconto" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Aplicar Desconto</h3>
+      <div class="desconto-options">
+        <label><input type="radio" name="tipo-desconto" value="percentual" checked /> Percentual</label>
+        <label><input type="radio" name="tipo-desconto" value="valor" /> Valor Fixo</label>
+      </div>
+      <input type="number" id="valor-desconto" placeholder="Valor do desconto" />
+      <button id="aplicar-desconto-btn" class="btn btn-primary">Aplicar</button>
+      <button id="cancelar-desconto" class="btn">Cancelar Desconto</button>
+    </div>
+  </div>
+
+  <!-- Modal: Dividir Conta -->
+  <div id="modal-dividir" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Dividir Conta</h3>
+      <div class="divisao-options">
+        <button class="divisao-btn" data-pessoas="2">2 Pessoas</button>
+        <button class="divisao-btn" data-pessoas="3">3 Pessoas</button>
+        <button class="divisao-btn" data-pessoas="4">4 Pessoas</button>
+        <button class="divisao-btn" data-pessoas="5">5 Pessoas</button>
+        <button class="divisao-btn" data-pessoas="6">6 Pessoas</button>
+        <input type="number" id="divisao-personalizada" placeholder="Número de pessoas" />
+      </div>
+      <div id="divisao-resultado"></div>
+      <button id="confirmar-divisao" class="btn btn-primary">Confirmar</button>
+    </div>
+  </div>
+
+  <!-- Modal: Pagamento -->
+  <div id="modal-pagamento" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Finalizar Conta</h3>
+      <div class="pagamento-options">
+        <label><input type="radio" name="forma-pagamento" value="dinheiro" checked /> Dinheiro</label>
+        <label><input type="radio" name="forma-pagamento" value="debito" /> Débito</label>
+        <label><input type="radio" name="forma-pagamento" value="credito" /> Crédito</label>
+        <label><input type="radio" name="forma-pagamento" value="pix" /> PIX</label>
+      </div>
+      <div id="troco-section" class="hidden">
+        <label>Valor Recebido:</label>
+        <input type="number" id="valor-recebido" placeholder="R$ 0,00" />
+        <div id="troco-resultado">Troco: R$ 0,00</div>
+      </div>
+      <button id="confirmar-pagamento" class="btn btn-primary">Confirmar Pagamento</button>
+    </div>
+  </div>
+
+  <!-- Modal: Histórico -->
+  <div id="modal-historico" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Histórico de Contas</h3>
+      <div class="historico-resumo">
+        <div class="resumo-total">
+          <strong>Total do dia:</strong>
+          <span id="total-dia">R$ 0,00</span>
+        </div>
+        <button id="limpar-historico" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Limpar Todo o Histórico
+        </button>
+      </div>
+      <div class="historico-filtros">
+        <input type="date" id="filtro-data" />
+        <select id="filtro-mesa"><option value="">Todas as mesas</option></select>
+      </div>
+      <div class="historico-lista" id="historico-lista"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Item Customizado -->
+  <div id="modal-item-custom" class="modal">
+    <div class="modal-content modal-item-custom">
+      <span class="close-modal">&times;</span>
+      <h3>Adicionar Item Customizado</h3>
+      <input type="text" id="item-custom-nome" placeholder="Nome do item" />
+      <input type="number" id="item-custom-preco" placeholder="Preço" step="0.01" min="0" />
+      <button id="adicionar-item-custom" class="btn btn-primary">Adicionar</button>
+    </div>
+  </div>
+
+  <!-- Modal: Gerenciar Produtos -->
+  <div id="modal-gerenciar-produtos" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Gerenciar Produtos</h3>
+      <div id="produtos-form">
+        <input type="hidden" id="produto-id" />
+        <input type="text" id="produto-nome" placeholder="Nome do Produto" />
+        <input type="number" id="produto-preco" placeholder="Preço" min="0" step="0.01" />
+        <input type="text" id="produto-categoria" placeholder="Categoria" />
+        <button id="btn-salvar-produto" class="btn btn-primary">Salvar Produto</button>
+      </div>
+      <div class="historico-filtros" style="margin-top: 1rem;">
+        <input type="text" id="busca-gerenciar-produto" placeholder="Buscar por nome ou categoria..." />
+      </div>
+      <hr />
+      <div id="lista-produtos-gerenciar"></div>
+    </div>
+  </div>
+
+  <!-- Botões flutuantes -->
+  <button id="btn-historico" class="floating-btn"><i class="fas fa-history"></i></button>
+  <button id="btn-item-custom" class="floating-btn" style="right: 6rem"><i class="fas fa-plus"></i></button>
+  <button id="btn-gerenciar-produtos" class="floating-btn" style="right: 11rem"><i class="fas fa-boxes"></i></button>
+
+  <!-- Notificação -->
+  <div id="notification" class="notification hidden"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

@@ -471,11 +471,13 @@ h2 {
   font-weight: bold;
   z-index: 100;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s;
 }
 
 .notification.show {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .notification.success {

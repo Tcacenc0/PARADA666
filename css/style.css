@@ -453,6 +453,7 @@ h2 {
   align-items: center;
   justify-content: center;
   z-index: 99;
+  gap: 0.3rem;
 }
 
 .floating-btn:hover {
@@ -635,4 +636,71 @@ h2 {
 
 #limpar-historico {
   width: 100%;
+}
+/* Menu Flutuante */
+.floating-menu {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  z-index: 99;
+}
+
+.floating-main-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.floating-main-btn:hover {
+  background-color: #c0392b;
+  transform: scale(1.1);
+}
+
+.floating-sub-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+.floating-sub-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.floating-sub-btn:hover {
+  background-color: var(--primary-color);
+  transform: translateY(0) scale(1.1);
+}
+
+/* Esconder os botões flutuantes antigos */
+.floating-btn {
+  display: none !important;
 }

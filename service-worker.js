@@ -1,11 +1,11 @@
 const CACHE_NAME = "parada666-cache-v1";
 const urlsToCache = [
-  "/",
-  "/index.html",
-  "/css/style.css",
-  "/js/app.js",
-  "/js/database.js",
-  "/js/utils.js",
+  "./",
+  "./index.html",
+  "./style.css",
+  "./app.js",
+  "./database.js",
+  "./utils.js",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
 ];
 

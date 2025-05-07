@@ -156,68 +156,6 @@ function setupEventListeners() {
     }
   });
 
-  // Botões flutuantes - CORREÇÃO PRINCIPAL
-  document.getElementById("btn-item-custom").addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openModal("modal-item-custom");
-  });
-
-  document.getElementById("btn-gerenciar-produtos").addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openModal("modal-gerenciar-produtos");
-    renderGerenciadorProdutos();
-  });
-
-  document.getElementById("btn-historico").addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openModal("modal-historico");
-    renderHistorico();
-  });
-
-  // Botão salvar produto
-  document.getElementById("btn-salvar-produto").addEventListener("click", async () => {
-    const idRaw = document.getElementById("produto-id").value;
-    const id = parseInt(idRaw, 10);
-    const isEdicao = !isNaN(id) && id > 0;
-    const nome = document.getElementById("produto-nome").value.trim();
-    const preco = parseFloat(document.getElementById("produto-preco").value);
-    const categoria = document.getElementById("produto-categoria").value.trim();
-    
-    if (!nome || isNaN(preco) || preco <= 0 || !categoria) {
-      showNotification("Preencha todos os campos corretamente!", "warning");
-      return;
-    }
-    
-    const produto = { nome, preco, categoria };
-    
-    try {
-      if (isEdicao) {
-        produto.id = id;
-        await updateProduto(produto);
-        showNotification("Produto atualizado com sucesso!", "success");
-      } else {
-        await addProduto(produto);
-        showNotification("Produto adicionado com sucesso!", "success");
-      }
-      
-      // Limpa o formulário e atualiza as listas
-      document.getElementById("produto-id").value = "";
-      document.getElementById("produto-nome").value = "";
-      document.getElementById("produto-preco").value = "";
-      document.getElementById("produto-categoria").value = "";
-      
-      renderGerenciadorProdutos();
-      produtos = await getAllProdutos();
-      renderProdutos();
-    } catch (e) {
-      console.error(e);
-      showNotification("Erro ao salvar produto", "error");
-    }
-  });
-
   // Botão excluir mesa
   document.getElementById("excluir-mesa").addEventListener("click", excluirMesaAtual);
 
@@ -317,8 +255,103 @@ function setupEventListeners() {
   // Modal de item customizado
   document.getElementById("adicionar-item-custom").addEventListener("click", adicionarItemCustomizado);
 
+  // Botão salvar produto
+  document.getElementById("btn-salvar-produto").addEventListener("click", async () => {
+    const idRaw = document.getElementById("produto-id").value;
+    const id = parseInt(idRaw, 10);
+    const isEdicao = !isNaN(id) && id > 0;
+    const nome = document.getElementById("produto-nome").value.trim();
+    const preco = parseFloat(document.getElementById("produto-preco").value);
+    const categoria = document.getElementById("produto-categoria").value.trim();
+    
+    if (!nome || isNaN(preco) || preco <= 0 || !categoria) {
+      showNotification("Preencha todos os campos corretamente!", "warning");
+      return;
+    }
+    
+    const produto = { nome, preco, categoria };
+    
+    try {
+      if (isEdicao) {
+        produto.id = id;
+        await updateProduto(produto);
+        showNotification("Produto atualizado com sucesso!", "success");
+      } else {
+        await addProduto(produto);
+        showNotification("Produto adicionado com sucesso!", "success");
+      }
+      
+      // Limpa o formulário e atualiza as listas
+      document.getElementById("produto-id").value = "";
+      document.getElementById("produto-nome").value = "";
+      document.getElementById("produto-preco").value = "";
+      document.getElementById("produto-categoria").value = "";
+      
+      renderGerenciadorProdutos();
+      produtos = await getAllProdutos();
+      renderProdutos();
+    } catch (e) {
+      console.error(e);
+      showNotification("Erro ao salvar produto", "error");
+    }
+  });
+
   // Limpar histórico
   document.getElementById("limpar-historico").addEventListener("click", limparHistoricoCompleto);
+
+  // Configurar menu flutuante expansível
+  const mainFloatingBtn = document.getElementById("floating-main-btn");
+  const floatingSubBtns = document.querySelectorAll(".floating-sub-btn");
+
+  mainFloatingBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    floatingSubBtns.forEach(btn => {
+      btn.classList.toggle("show");
+    });
+    
+    // Rotacionar ícone quando expandido
+    if ([...floatingSubBtns].some(btn => btn.classList.contains("show"))) {
+      mainFloatingBtn.innerHTML = '<i class="fas fa-times"></i>';
+    } else {
+      mainFloatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+  });
+
+  // Fechar menu quando clicar em qualquer lugar da tela
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".floating-menu") && 
+        [...floatingSubBtns].some(btn => btn.classList.contains("show"))) {
+      floatingSubBtns.forEach(btn => btn.classList.remove("show"));
+      mainFloatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+  });
+
+  // Manter os eventos originais dos botões
+  document.getElementById("btn-historico").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal("modal-historico");
+    renderHistorico();
+    floatingSubBtns.forEach(btn => btn.classList.remove("show"));
+    mainFloatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+  });
+
+  document.getElementById("btn-item-custom").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal("modal-item-custom");
+    floatingSubBtns.forEach(btn => btn.classList.remove("show"));
+    mainFloatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+  });
+
+  document.getElementById("btn-gerenciar-produtos").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal("modal-gerenciar-produtos");
+    renderGerenciadorProdutos();
+    floatingSubBtns.forEach(btn => btn.classList.remove("show"));
+    mainFloatingBtn.innerHTML = '<i class="fas fa-bars"></i>';
+  });
 }
 
 // Renderizar gerenciador de produtos
@@ -379,7 +412,7 @@ async function excluirMesaAtual() {
   const isMesaPadrao = /^Mesa [1-5]$/.test(mesaAtual.nome);
 
   if (isMesaPadrao) {
-    showNotification("Não é possível excluir mesas padrão (1-10)!", "warning");
+    showNotification("Não é possível excluir mesas padrão (1-5)!", "warning");
     return;
   }
 
@@ -1022,7 +1055,6 @@ async function renderHistorico(dateFilter = "", mesaFilter = "") {
       mostrarDetalhesHistorico(conta);
     });
 
-
     historicoLista.appendChild(contaElement);
   });
 }
@@ -1097,5 +1129,7 @@ function mostrarDetalhesHistorico(conta) {
 
   alert(detalhes.replace(/<[^>]*>/g, ""));
 }
+
+// Exportar funções para o escopo global
 window.editarProduto = editarProduto;
 window.excluirProduto = excluirProduto;

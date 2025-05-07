@@ -8,17 +8,16 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#8b0000" />
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(reg => console.log("Service Worker registrado!"))
-        .catch(err => console.log("Falha no Service Worker", err));
-    });
-  }
-</script>
-
+  <meta name="theme-color" content="#8b0000" />
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(reg => console.log("Service Worker registrado!"))
+          .catch(err => console.log("Falha no Service Worker", err));
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="container">
@@ -179,10 +178,13 @@
     </div>
   </div>
 
-  <!-- Botões flutuantes -->
-  <button id="btn-historico" class="floating-btn"><i class="fas fa-history"></i></button>
-  <button id="btn-item-custom" class="floating-btn" style="right: 6rem"><i class="fas fa-plus"></i></button>
-  <button id="btn-gerenciar-produtos" class="floating-btn" style="right: 11rem"><i class="fas fa-boxes"></i></button>
+  <!-- Menu Flutuante -->
+  <div class="floating-menu">
+    <button id="btn-historico" class="floating-sub-btn" title="Histórico"><i class="fas fa-history"></i></button>
+    <button id="btn-item-custom" class="floating-sub-btn" title="Item Customizado"><i class="fas fa-plus"></i></button>
+    <button id="btn-gerenciar-produtos" class="floating-sub-btn" title="Gerenciar Produtos"><i class="fas fa-boxes"></i></button>
+    <button id="floating-main-btn" class="floating-main-btn"><i class="fas fa-bars"></i></button>
+  </div>
 
   <!-- Notificação -->
   <div id="notification" class="notification hidden"></div>

@@ -865,15 +865,22 @@ async function finalizarConta() {
     }
   }
 
+  // Calcular o total SEM a divisão para salvar no histórico
+  const totalSemDivisao = calcularTotalMesa({
+    ...mesaAtual,
+    divisao: 1
+  }).total;
+
   const conta = {
     mesaId: mesaAtual.id,
     mesaNome: mesaAtual.nome,
     itens: [...mesaAtual.itens],
-    subtotal: calcularTotalMesa(mesaAtual).subtotal,
+    subtotal: calcularTotalMesa({...mesaAtual, desconto: 0, divisao: 1}).subtotal,
     desconto: mesaAtual.desconto,
     tipoDesconto: mesaAtual.tipoDesconto,
     divisao: mesaAtual.divisao,
-    total: calcularTotalMesa(mesaAtual).total,
+    total: totalSemDivisao, // Salvar o total sem divisão no histórico
+    totalDividido: calcularTotalMesa(mesaAtual).total, // Salvar também o valor dividido
     formaPagamento: formaPagamento,
     valorRecebido: formaPagamento === "dinheiro" ? valorRecebido : null,
     troco: formaPagamento === "dinheiro" ? troco : null,
@@ -955,10 +962,12 @@ function mostrarRecibo(conta) {
       `
           : ""
       }
+      <p>Total: ${formatMoney(conta.total)}</p>
       ${
-        conta.divisao > 1 ? `<p>Dividido por: ${conta.divisao} pessoas</p>` : ""
+        conta.divisao > 1 
+          ? `<p>Dividido por ${conta.divisao} pessoas: ${formatMoney(conta.totalDividido)} cada</p>`
+          : ""
       }
-      <h3>Total: ${formatMoney(conta.total)}</h3>
       <hr>
       <p>Forma de pagamento: ${conta.formaPagamento}</p>
       ${
